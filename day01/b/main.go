@@ -26,7 +26,7 @@ func main() {
 	}
 
 	count := 0
-	for i := 2; i  <len(depths)-1; i++ {
+	for i := 2; i < len(depths)-1; i++ {
 		a := depths[i-2] + depths[i-1] + depths[i]
 		b := depths[i-1] + depths[i] + depths[i+1]
 		if b > a {

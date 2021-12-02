@@ -15,7 +15,7 @@ func main() {
 	lines := strings.Split(string(in), "\n")
 
 	var prev *int
-	count:= 0
+	count := 0
 	for _, line := range lines {
 		if prev == nil {
 			prev = new(int)
