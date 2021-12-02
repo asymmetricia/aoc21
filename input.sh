@@ -38,3 +38,5 @@ until curl -L -f \
         > "day$(printf "%02d" "$N")/a/input"; do
   sleep 10
 done
+cp "day$(printf "%02d" "$N")/a/input" \
+   "day$(printf "%02d" "$N")/b/input"
