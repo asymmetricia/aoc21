@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strings"
 
@@ -17,7 +18,22 @@ func main() {
 
 	lines := strings.Split(strings.TrimSpace(string(input)), "\n")
 
+	var bits = map[int]int{}
 	for _, line := range lines {
-		line = line
+		for i, c := range line {
+			if c == '1' {
+				bits[i]++
+			}
+		}
 	}
+	width := len(lines[0])
+	var gamma, epsilon int
+	for i := 0; i < width; i++ {
+		if bits[i] > len(lines)/2 {
+			gamma |= 1 << (width - i - 1)
+		} else {
+			epsilon |= 1 << (width - i - 1)
+		}
+	}
+	fmt.Println(gamma, epsilon, gamma * epsilon)
 }
