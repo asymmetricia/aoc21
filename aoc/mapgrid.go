@@ -2,6 +2,9 @@ package aoc
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
 	"math"
 	"strconv"
 
@@ -79,4 +82,19 @@ func (m MapGrid) Print() {
 		}
 		fmt.Print("\n")
 	}
+}
+
+func (m MapGrid) Draw(r image.Rectangle, bg color.Color, cellToColorIndex map[int]uint8, palette color.Palette) *image.Paletted {
+	target := image.NewPaletted(r.Sub(r.Min), palette)
+	draw.Draw(target, target.Bounds(), image.NewUniform(bg), image.Point{}, draw.Over)
+	for y, row := range m {
+		for x, cell := range row {
+			idx, ok := cellToColorIndex[cell]
+			if !ok {
+				continue
+			}
+			target.SetColorIndex(x - r.Min.X, y - r.Min.Y, idx)
+		}
+	}
+	return target
 }
