@@ -93,7 +93,7 @@ func (m MapGrid) Draw(r image.Rectangle, bg color.Color, cellToColorIndex map[in
 			if !ok {
 				continue
 			}
-			target.SetColorIndex(x - r.Min.X, y - r.Min.Y, idx)
+			target.SetColorIndex(x-r.Min.X, y-r.Min.Y, idx)
 		}
 	}
 	return target

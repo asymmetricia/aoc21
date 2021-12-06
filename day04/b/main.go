@@ -2,11 +2,17 @@ package main
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+	"image/gif"
 	"io/ioutil"
+	"math"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/asymmetricia/aoc21/aoc"
 	"github.com/sirupsen/logrus"
 )
 
@@ -32,6 +38,52 @@ func win(board [][]int, draws map[int]bool) bool {
 		}
 	}
 	return false
+}
+
+func drawBoards(boards [][][]int, draws map[int]bool) *image.Paletted {
+	cellWidth := 0
+	for _, board := range boards {
+		for _, row := range board {
+			for _, num := range row {
+				l := math.Log10(float64(num))
+				w := int(math.Floor(l)) + 1
+				if w > cellWidth {
+					cellWidth = w
+				}
+			}
+		}
+	}
+
+	// boardWidth is the number of rows or columns
+	boardWidth := len(boards[0])
+
+	// fieldWidth is the number of boards wide
+	fieldWidth := int(math.Ceil(math.Sqrt(float64(len(boards)))))
+
+	width := fieldWidth * (boardWidth + 1) * (cellWidth + 1) * 8 - 25
+	field := image.NewPaletted(image.Rect(0, 0, width, width), aoc.TolVibrant)
+
+	for i, board := range boards {
+		win := win(board, draws)
+		for y, row := range board {
+			for x, num := range row {
+				pt := image.Pt(
+					(i%fieldWidth)*(boardWidth+1)*(cellWidth+1)*8+x*(cellWidth+1)*8,
+					(i/fieldWidth)*(boardWidth+1)*(cellWidth+1)*8+y*(cellWidth+1)*8)
+				var c color.Color = color.White
+				if win && y % 2 == x % 2 {
+					c = aoc.TolVibrantMagenta
+				} else if win {
+					c = aoc.TolVibrantTeal
+				} else if draws[num] {
+					c = aoc.TolVibrantCyan
+				}
+				aoc.Typeset(field, pt, strconv.Itoa(num), c)
+			}
+		}
+	}
+
+	return field
 }
 
 func main() {
@@ -63,6 +115,10 @@ func main() {
 		boards = append(boards, board)
 	}
 
+	anim := &gif.GIF{}
+
+	allBoards := make([][][]int, len(boards))
+	copy(allBoards, boards)
 	draws := map[int]bool{}
 	for _, draw := range strings.Split(order, ",") {
 		n, _ := strconv.Atoi(draw)
@@ -84,6 +140,29 @@ func main() {
 				fmt.Println(n * score)
 			}
 		}
+		anim.Image = append(anim.Image, drawBoards(allBoards, draws))
+		anim.Delay = append(anim.Delay, 1)
+		anim.Disposal = append(anim.Disposal, gif.DisposalNone)
+		if len(boards) == 0 {
+			break
+		}
+	}
+	anim.Delay[len(anim.Delay)-1] = 100
+
+	aoc.Optimize(anim.Image)
+
+	f, err := os.OpenFile("anim.gif", os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0644)
+	if err == nil {
+		err = gif.EncodeAll(f, anim)
+	}
+	if err == nil {
+		err = f.Sync()
+	}
+	if err == nil {
+		err = f.Close()
+	}
+	if err != nil {
+		panic(err)
 	}
 
 }
