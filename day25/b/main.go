@@ -14,6 +14,7 @@ func main() {
 	if err != nil {
 		log.WithError(err).Fatal("could not read input")
 	}
+	input = bytes.TrimSpace(input)
 
 	lines := strings.Split(strings.TrimSpace(string(input)), "\n")
 
