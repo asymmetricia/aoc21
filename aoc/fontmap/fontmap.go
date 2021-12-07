@@ -41,7 +41,7 @@ func main() {
 		aoc.Typeset(img, image.Pt(0, (len(glyphs)/xdim+2)*aoc.LineHeight*scale), message, color.White, aoc.TypesetOpts{scale})
 		aoc.Typeset(img, image.Pt(0, (len(glyphs)/xdim+3)*aoc.LineHeight*scale), strings.ToUpper(message), color.White, aoc.TypesetOpts{scale})
 		g.Image = append(g.Image, img)
-		g.Delay = append(g.Delay, 10)
+		g.Delay = append(g.Delay, 50)
 		g.Disposal = append(g.Disposal, gif.DisposalNone)
 	}
 
