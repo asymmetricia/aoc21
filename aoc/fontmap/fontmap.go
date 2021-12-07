@@ -45,6 +45,8 @@ func main() {
 		g.Disposal = append(g.Disposal, gif.DisposalNone)
 	}
 
+	aoc.Optimize(g.Image)
+
 	f, err := os.OpenFile("out.gif", os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
 	if err == nil {
 		err = gif.EncodeAll(f, g)
