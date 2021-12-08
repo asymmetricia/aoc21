@@ -3,7 +3,6 @@ package aoc
 import (
 	"image"
 	"image/color"
-	"image/draw"
 )
 
 func Optimize(imgs []*image.Paletted) {
@@ -11,7 +10,7 @@ func Optimize(imgs []*image.Paletted) {
 		return
 	}
 	accum := image.NewPaletted(imgs[0].Rect, imgs[0].Palette)
-	draw.Draw(accum, accum.Rect, image.NewUniform(color.Transparent), image.Point{}, draw.Over)
+	copy(accum.Pix, imgs[0].Pix)
 
 	tr := imgs[0].Palette.Index(color.Transparent)
 	for _, img := range imgs[1:] {

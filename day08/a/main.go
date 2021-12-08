@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"strings"
 
@@ -19,7 +20,19 @@ func main() {
 
 	lines := strings.Split(strings.TrimSpace(string(input)), "\n")
 
+	count := 0
+
 	for _, line := range lines {
-		line = line
+		parts := strings.Split(line, "|")
+		digits := strings.Split(strings.TrimSpace(parts[1]), " ")
+		for _, digit := range digits {
+			switch len(digit) {
+			case 2: count++ // one
+			case 3: count++ // seven
+			case 4: count++ // four
+			case 7: count++ // eight
+			}
+		}
 	}
+	fmt.Println(count)
 }
