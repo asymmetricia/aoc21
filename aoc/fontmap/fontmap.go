@@ -24,7 +24,7 @@ func main() {
 
 	const message = "the quick brown fox jumps over the lazy dog at (1,1)."
 	xdim := len(message)
-	ydim := len(glyphs)/xdim + 4
+	ydim := len(glyphs)/xdim + 5
 	const scale = 4
 
 	g := &gif.GIF{}
@@ -36,10 +36,19 @@ func main() {
 			aoc.Typeset(img, image.Pt(
 				(i%xdim)*8*scale,
 				(i/xdim)*aoc.LineHeight*scale,
-			), string(r), aoc.TolVibrant[rand.Intn(len(aoc.TolVibrant)-4)+3], aoc.TypesetOpts{scale})
+			), string(r), aoc.TolVibrant[rand.Intn(len(aoc.TolVibrant)-4)+3], aoc.TypesetOpts{Scale: scale})
 		}
-		aoc.Typeset(img, image.Pt(0, (len(glyphs)/xdim+2)*aoc.LineHeight*scale), message, color.White, aoc.TypesetOpts{scale})
-		aoc.Typeset(img, image.Pt(0, (len(glyphs)/xdim+3)*aoc.LineHeight*scale), strings.ToUpper(message), color.White, aoc.TypesetOpts{scale})
+		aoc.Typeset(img, image.Pt(0, (len(glyphs)/xdim+2)*aoc.LineHeight*scale), message, color.White, aoc.TypesetOpts{Scale: scale})
+		aoc.Typeset(img, image.Pt(0, (len(glyphs)/xdim+3)*aoc.LineHeight*scale), strings.ToUpper(message), color.White, aoc.TypesetOpts{Scale: scale})
+
+		aoc.Typeset(
+			img,
+			image.Pt(0, (len(glyphs)/xdim+4)*aoc.LineHeight*scale),
+			strings.ToUpper(message),
+			color.White,
+			aoc.TypesetOpts{scale, true},
+		)
+
 		g.Image = append(g.Image, img)
 		g.Delay = append(g.Delay, 50)
 		g.Disposal = append(g.Disposal, gif.DisposalNone)

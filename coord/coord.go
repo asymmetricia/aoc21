@@ -36,6 +36,12 @@ func FromComma(xy string) (Coord, error) {
 	return ret, nil
 }
 
+func (c Coord) North() Coord {
+	return Coord{c.X, c.Y - 1}
+}
+func (c Coord) South() Coord {
+	return Coord{c.X, c.Y + 1}
+}
 func (c Coord) East() Coord {
 	return Coord{c.X + 1, c.Y}
 }

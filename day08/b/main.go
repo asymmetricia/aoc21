@@ -30,6 +30,7 @@ func dmask(s string) uint8 {
 var fc int
 
 func renderFrame(g *gif.GIF, input []string, solutions map[int]map[uint8]int, total int) {
+	const cols = 2
 	fc++
 
 	if fc > 150 && fc%5 != 0 {
@@ -86,16 +87,16 @@ func renderFrame(g *gif.GIF, input []string, solutions map[int]map[uint8]int, to
 	cooked = append(cooked, Line{{"Total:", aoc.TolVibrantBlue},
 		{strconv.Itoa(total), aoc.TolVibrantCyan}})
 
-	rows := int(math.Ceil(float64(len(input)) / 3))
+	rows := int(math.Ceil(float64(len(input)+1) / cols))
 
-	img := image.NewPaletted(image.Rect(0, 0, (w*3+2)*8, rows*aoc.LineHeight), aoc.TolVibrant)
+	img := image.NewPaletted(image.Rect(0, 0, (w*cols+2)*8, rows*aoc.LineHeight), aoc.TolVibrant)
 	draw.Draw(img, img.Bounds(), image.Black, image.Point{}, draw.Over)
 	for i, line := range cooked {
 		cursor := 0
 		for _, word := range line {
 			aoc.Typeset(
 				img,
-				image.Pt(i%3*(w+1)*8+cursor*8, i/3*aoc.LineHeight),
+				image.Pt(i%cols*(w+1)*8+cursor*8, i/cols*aoc.LineHeight),
 				word.string,
 				word.Color,
 			)
