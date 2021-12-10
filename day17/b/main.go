@@ -12,6 +12,7 @@ var log = logrus.StandardLogger()
 
 func main() {
 	input, err := ioutil.ReadFile("input")
+	// input, err := ioutil.ReadFile("test")
 	if err != nil {
 		log.WithError(err).Fatal("could not read input")
 	}
