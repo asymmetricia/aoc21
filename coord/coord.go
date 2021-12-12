@@ -10,6 +10,24 @@ type Coord struct {
 	X, Y int
 }
 
+func C(x, y int) Coord {
+	return Coord{x, y}
+}
+
+func (c Coord) Neighbors(diag bool) []Coord {
+	if diag {
+		return []Coord{
+			c.North(), c.NorthEast(),
+			c.East(), c.SouthEast(),
+			c.South(), c.SouthWest(),
+			c.West(), c.NorthWest(),
+		}
+	}
+	return []Coord{
+		c.North(), c.East(), c.South(), c.West(),
+	}
+}
+
 func MustFromComma(xy string) Coord {
 	c, e := FromComma(xy)
 	if e != nil {
