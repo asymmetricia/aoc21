@@ -6,11 +6,24 @@ import (
 	"github.com/asymmetricia/aoc21/coord"
 )
 
+// AStarGraph finds the path from start to end along the grpah defined by edges
+// returns from calling neighbors against each cell such that the path minimizes
+// the total cost.
+//
+// If any callbacks are defined, they're called just before each time a cell is
+// picked from the open set.
 func AStarGraph[Cell comparable](
 	start Cell,
 	end Cell,
 	neighbors func(a Cell) []Cell,
 	cost func(a, b Cell) int,
+	heuristic func(a Cell) int,
+	callback ...func(
+		openSet map[Cell]bool,
+		cameFrom map[Cell]Cell,
+		gScore map[Cell]int,
+		fScore map[Cell]int,
+		current Cell),
 ) []Cell {
 	openSet := map[Cell]bool{start: true}
 	cameFrom := map[Cell]Cell{}
@@ -37,6 +50,10 @@ func AStarGraph[Cell comparable](
 			}
 		}
 
+		for _, cb := range callback {
+			cb(openSet, cameFrom, gScore, fScore, current)
+		}
+
 		if current == end {
 			break
 		}
@@ -48,18 +65,17 @@ func AStarGraph[Cell comparable](
 			if !ok {
 				curGS = math.MaxInt
 			}
+
 			neighGS, ok := gScore[neighbor]
 			if !ok {
 				neighGS = math.MaxInt32
 			}
 
-			cost := cost(current, neighbor)
-
-			tentativeGScore := curGS + cost
+			tentativeGScore := curGS + cost(current, neighbor)
 			if tentativeGScore < neighGS {
 				cameFrom[neighbor] = current
 				gScore[neighbor] = tentativeGScore
-				fScore[neighbor] = tentativeGScore + cost
+				fScore[neighbor] = tentativeGScore + heuristic(neighbor)
 				openSet[neighbor] = true
 			}
 		}
@@ -86,8 +102,15 @@ func AStarGrid[Cell any](
 	start coord.Coord,
 	end coord.Coord,
 	cost func(from, to coord.Coord) int,
+	heuristic func(from coord.Coord) int,
 	diag bool,
-) []coord.Coord {
+	callback ...func(
+		openSet map[coord.Coord]bool,
+		cameFrom map[coord.Coord]coord.Coord,
+		gScore map[coord.Coord]int,
+		fScore map[coord.Coord]int,
+		current coord.Coord,
+	)) []coord.Coord {
 	return AStarGraph(start, end,
 		func(a coord.Coord) []coord.Coord {
 			var ret []coord.Coord
@@ -98,5 +121,7 @@ func AStarGrid[Cell any](
 			}
 			return ret
 		},
-		cost)
+		cost,
+		heuristic,
+		callback...)
 }
