@@ -4,7 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/asymmetricia/aoc21/aoc"
+	"image"
+	"image/color"
+	"image/gif"
 	"io/ioutil"
+	"math"
 	"regexp"
 	"strings"
 
@@ -128,7 +132,38 @@ func main() {
 	var cuboids []Cuboid
 
 	re := regexp.MustCompile(`(on|off) x=([0-9-]+)..([0-9-]+),y=([0-9-]+)..([0-9-]+),z=([0-9-]+)..([0-9-]+)`)
+
+	var min, max int = math.MaxInt, math.MinInt
 	for _, line := range lines {
+		m := re.FindStringSubmatch(line)
+		ax := aoc.MustAtoi(m[2])
+		bx := aoc.MustAtoi(m[3])
+		ay := aoc.MustAtoi(m[4])
+		by := aoc.MustAtoi(m[5])
+		min = aoc.Min(min, ax, bx, ay, by)
+		max = aoc.Max(max, ax, bx, ay, by)
+	}
+	dim := max - min
+
+	const res = 512
+	scale := dim / (res - 1)
+	log.Print(dim, scale)
+
+	//bg := image.NewPaletted(image.Rect(0, 1024, 0, 1024), aoc.TolSequentialSmoothRainbow)
+	//anim := &gif.GIF{Image: []*image.Paletted{bg}}
+
+	var frames [][][]int
+
+	var maxVal int
+	//var ms runtime.MemStats
+	for _, line := range lines {
+		//runtime.ReadMemStats(&ms)
+		//log.WithField("line", i).WithField("mem_mi", ms.Alloc/1024/1024).Print(line)
+		frame := make([][]int, res)
+		for row := range frame {
+			frame[row] = make([]int, res)
+		}
+
 		m := re.FindStringSubmatch(line)
 		ax := aoc.MustAtoi(m[2])
 		bx := aoc.MustAtoi(m[3])
@@ -157,22 +192,57 @@ func main() {
 			var result []Cuboid
 			for _, c := range cuboids {
 				r := c.Subtract(thisC[0])
-				//fmt.Println("  ", c)
-				//fmt.Println(" -", thisC[0])
-				//for _, r := range r {
-				//	fmt.Println(" =", r)
-				//}
 				result = append(result, r...)
 			}
 			cuboids = result
 		}
-		log.Print(len(cuboids))
+
+		for _, c := range cuboids {
+			for x := c.Ax; x < c.Bx; x += scale {
+				for y := c.Ay; y < c.By; y += scale {
+					scrX := (x - min) / scale
+					if scrX >= res {
+						scrX = res - 1
+					}
+
+					scrY := (y - min) / scale
+					if scrY >= res {
+						scrY = res - 1
+					}
+
+					frame[scrY][scrX] += c.Bz - c.Az + 1
+					if frame[scrY][scrX] > maxVal {
+						maxVal = frame[scrY][scrX]
+					}
+				}
+			}
+		}
+		frames = append(frames, frame)
 	}
 	count := 0
 	for _, c := range cuboids {
-		count += (c.Bx - c.Ax + 1) *
-			(c.By - c.Ay + 1) *
-			(c.Bz - c.Az + 1)
+		count += c.Count()
 	}
 	log.Print(count)
+
+	anim := &gif.GIF{}
+	for _, frame := range frames {
+		img := image.NewPaletted(image.Rect(0, 0, res, res), aoc.TolSequentialSmoothRainbow)
+		for y, row := range frame {
+			for x, v := range row {
+				if v == 0 {
+					img.Set(x, y, color.White)
+				} else {
+					img.Set(x, y, aoc.TolScale(0, maxVal, v))
+				}
+			}
+		}
+		anim.Image = append(anim.Image, img)
+		anim.Delay = append(anim.Delay, 5)
+		anim.Disposal = append(anim.Disposal, gif.DisposalNone)
+	}
+	anim.Delay[len(anim.Delay)-1] = 300
+	aoc.Optimize(anim.Image)
+	aoc.SaveGIF(anim, "day22.gif")
+
 }
