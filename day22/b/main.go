@@ -145,7 +145,7 @@ func main() {
 	}
 	dim := max - min
 
-	const res = 512
+	const res = 2048
 	scale := dim / (res - 1)
 	log.Print(dim, scale)
 

@@ -25,3 +25,10 @@ func Min[K constraints.Ordered](a ...K) K {
 	}
 	return min
 }
+
+func Abs[K constraints.Signed | constraints.Float](a K) K {
+	if a < 0 {
+		return -a
+	}
+	return a
+}

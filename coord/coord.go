@@ -10,6 +10,10 @@ type Coord struct {
 	X, Y int
 }
 
+func (c Coord) String() string {
+	return fmt.Sprintf("(%d,%d)", c.X, c.Y)
+}
+
 func C(x, y int) Coord {
 	return Coord{x, y}
 }
@@ -54,6 +58,28 @@ func FromComma(xy string) (Coord, error) {
 	return ret, nil
 }
 
+func (c Coord) Move(d Direction) Coord {
+	switch d {
+	case North:
+		return c.North()
+	case NorthEast:
+		return c.NorthEast()
+	case East:
+		return c.East()
+	case SouthEast:
+		return c.SouthEast()
+	case South:
+		return c.South()
+	case SouthWest:
+		return c.SouthWest()
+	case West:
+		return c.West()
+	case NorthWest:
+		return c.NorthWest()
+	}
+	panic("bad direction " + strconv.Itoa(int(d)))
+}
+
 func (c Coord) North() Coord {
 	return Coord{c.X, c.Y - 1}
 }
@@ -81,20 +107,9 @@ func (c Coord) SouthWest() Coord {
 
 func (c Coord) Execute(steps []string) Coord {
 	for _, step := range steps {
-		switch step {
-		case "e":
-			c = c.East()
-		case "w":
-			c = c.West()
-		case "ne":
-			c = c.NorthEast()
-		case "nw":
-			c = c.NorthWest()
-		case "se":
-			c = c.SouthEast()
-		case "sw":
-			c = c.SouthWest()
-		default:
+		if dir, ok := DirectionStrings[step]; ok {
+			c = c.Move(dir)
+		} else {
 			panic(step)
 		}
 	}
