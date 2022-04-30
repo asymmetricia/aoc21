@@ -8,22 +8,35 @@ import (
 
 type SparseWorld map[Coord]rune
 
-func (w SparseWorld) Print() {
-	minx, maxx, miny, maxy := math.MaxInt, math.MinInt, math.MaxInt, math.MinInt
+func (w SparseWorld) Copy() World {
+	r := make(SparseWorld, len(w))
+	for c, obj := range w {
+		r[c] = obj
+	}
+	return r
+}
+
+func (w SparseWorld) Rect() (minX, minY, maxX, maxY int) {
+	minX, maxX, minY, maxY = math.MaxInt, math.MinInt, math.MaxInt, math.MinInt
 	for c := range w {
-		if c.X < minx {
-			minx = c.X
+		if c.X < minX {
+			minX = c.X
 		}
-		if c.X > maxx {
-			maxx = c.X
+		if c.X > maxX {
+			maxX = c.X
 		}
-		if c.Y < miny {
-			miny = c.Y
+		if c.Y < minY {
+			minY = c.Y
 		}
-		if c.Y > maxy {
-			maxy = c.Y
+		if c.Y > maxX {
+			maxX = c.Y
 		}
 	}
+	return minX, minY, maxX, maxY
+}
+
+func (w SparseWorld) Print() {
+	minx, miny, maxx, maxy := w.Rect()
 
 	for y := miny; y <= maxy; y++ {
 		sb := strings.Builder{}
@@ -50,7 +63,29 @@ func (w SparseWorld) Set(coord Coord, r rune) {
 	w[coord] = r
 }
 
+func (w SparseWorld) Each(f func(Coord) bool) {
+	for c := range w {
+		if f(c) {
+			return
+		}
+	}
+}
+
 type DenseWorld [][]rune
+
+func (d DenseWorld) Copy() World {
+	r := make(DenseWorld, len(d))
+	for i, row := range d {
+		newRow := make([]rune, len(row))
+		copy(newRow, row)
+		r[i] = newRow
+	}
+	return &r
+}
+
+func (d DenseWorld) Rect() (minX, minY, maxX, maxY int) {
+	return 0, 0, len(d[0]) - 1, len(d) - 1
+}
 
 func (d DenseWorld) Print() {
 	sb := &strings.Builder{}
@@ -74,19 +109,34 @@ func (d DenseWorld) At(coord Coord) rune {
 }
 
 func (d *DenseWorld) Set(coord Coord, r rune) {
-	if len(*d) <= coord.Y {
-		*d = append(*d, make([][]rune, len(*d)-coord.Y+1)...)
+	height := len(*d)
+	if height <= coord.Y {
+		*d = append(*d, make([][]rune, height-coord.Y+1)...)
 	}
-	if len((*d)[coord.Y]) <= coord.X {
-		(*d)[coord.Y] = append((*d)[coord.Y], make([]rune, len((*d)[coord.Y])-coord.X+1)...)
+	width := len((*d)[coord.Y])
+	if width <= coord.X {
+		(*d)[coord.Y] = append((*d)[coord.Y], make([]rune, coord.X-width+1)...)
 	}
 	(*d)[coord.Y][coord.X] = r
+}
+
+func (d *DenseWorld) Each(f func(Coord) (stop bool)) {
+	for y, row := range *d {
+		for x := range row {
+			if f(C(x, y)) {
+				return
+			}
+		}
+	}
 }
 
 type World interface {
 	Print()
 	At(Coord) rune
 	Set(Coord, rune)
+	Each(func(Coord) (stop bool))
+	Rect() (minX, minY, maxX, maxY int)
+	Copy() World
 }
 
 var _ World = (*SparseWorld)(nil)
