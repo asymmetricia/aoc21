@@ -9,6 +9,7 @@ func ClearLine() {
 	print("\x1b[2K")
 }
 
+// Clear clears but does not move the cursor
 func Clear() {
 	print("\x1b[2J")
 }
